@@ -1,0 +1,42 @@
+function resultImg = seamlessCloningPoisson(sourceImg, targetImg, mask, offsetX, offsetY)
+
+
+    targetMap_r = targetImg(:,:,1);
+    targetMap_g = targetImg(:,:,2);
+    targetMap_b = targetImg(:,:,3);
+    sourceMap_r = sourceImg(:,:,1);
+    sourceMap_g = sourceImg(:,:,2);
+    sourceMap_b = sourceImg(:,:,3);
+    [targetH,targetW,~]=size(targetImg);
+    
+    
+    indexes=getIndexes(mask,targetH, targetW, offsetX, offsetY);
+
+    coeffA = getCoefficientMatrix(indexes);%compute coefficient matrix 
+    r_R = getSolutionVect(indexes, sourceMap_r, targetMap_r, offsetX, offsetY);%find solution vector for each color channel
+    g_R = getSolutionVect(indexes, sourceMap_g, targetMap_g, offsetX, offsetY);
+    b_R = getSolutionVect(indexes, sourceMap_b, targetMap_b, offsetX, offsetY);
+
+    % Generate a coefficient matrix for the mask
+    [indexes] = getIndexes(mask, targetH, targetW, offsetX, offsetY);
+    [coeffA] = getCoefficientMatrix(indexes);
+    
+    % Calcualte replace pixals for R/G/B channels
+    [solVectorb_r] = getSolutionVect(indexes, sourceMap_r, targetMap_r, offsetX, offsetY);
+    [solVectorb_g] = getSolutionVect(indexes, sourceMap_g, targetMap_g, offsetX, offsetY);
+    [solVectorb_b] = getSolutionVect(indexes, sourceMap_b, targetMap_b, offsetX, offsetY);
+    rep_r = coeffA \ solVectorb_r';
+    rep_g = coeffA \ solVectorb_g';
+    rep_b = coeffA \ solVectorb_b';
+    
+    % Reconstruct the image
+    [resultImg] = reconstructImg(indexes,rep_r,rep_g,rep_b,targetImg);
+    
+    
+    red=sparse(coeffA)\(r_R');%solve for each color channel 
+green=sparse(coeffA)\(g_R');
+blue=sparse(coeffA)\(b_R');
+
+resultImg=reconstructImg(indexes, red', green', blue', targetImg);%reconstruct image
+
+end
