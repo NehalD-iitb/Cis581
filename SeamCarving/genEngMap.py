@@ -1,7 +1,7 @@
 '''
   File name: genEngMap.py
-  Author: Haoyuan(Steve) Zhang
-  Date created: 10/15/2017
+  Author: 
+  Date created: 
 '''
 
 '''
